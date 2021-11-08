@@ -1,0 +1,20 @@
+{
+  "name": "express-mesto",
+  "version": "1.0.0",
+  "description": "`/routes` — папка с файлами роутера  \r `/controllers` — папка с файлами контроллеров пользователя и карточки   \r `/models` — папка с файлами описания схем пользователя и карточки",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/anna-baranova/express-mesto.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/anna-baranova/express-mesto/issues"
+  },
+  "homepage": "https://github.com/anna-baranova/express-mesto#readme"
+}
