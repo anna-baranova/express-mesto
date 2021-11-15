@@ -2,13 +2,9 @@ const Card = require('../models/card');
 
 const getCards = (req, res) => Card.find({})
   .then((cards) => {
-    if (cards.length === 0) {
-      res.status(404).send({ message: 'Карточки не найдены' });
-      return;
-    }
     res.send(cards);
   })
-  .catch((err) => res.status(500).send(`Ошибка: ${err.code}${err.message}`));
+  .catch((err) => res.status(500).send({ message: `Ошибка: ${err.code}${err.message}` }));
 
 const createCard = (req, res) => {
   const { name, link } = req.body;
@@ -19,10 +15,10 @@ const createCard = (req, res) => {
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(404).send({ message: `Введены некорректные данные: ${err}` });
+        res.status(400).send({ message: `Введены некорректные данные: ${err}` });
         return;
       }
-      res.status(500).send(`Ошибка: ${err.code}${err.message}`);
+      res.status(500).send({ message: `Ошибка: ${err.code}${err.message}` });
     });
 };
 
@@ -33,7 +29,12 @@ const deleteCard = (req, res) => Card.findByIdAndRemove(req.params.cardId)
     }
     res.send(card);
   })
-  .catch((err) => res.status(500).send(`Ошибка: ${err.code}${err.message}`));
+  .catch((err) => {
+    if (err.name === 'CastError') {
+      res.status(400).send({ message: 'Невалидный id карточки' });
+    }
+    res.status(500).send({ message: `Ошибка: ${err.code}${err.message}` });
+  });
 
 const likeCard = (req, res) => Card.findByIdAndUpdate(
   req.params.cardId,
@@ -46,7 +47,12 @@ const likeCard = (req, res) => Card.findByIdAndUpdate(
     }
     res.send(likes);
   })
-  .catch((err) => res.status(500).send(`Ошибка: ${err.code}${err.message}`));
+  .catch((err) => {
+    if (err.name === 'CastError') {
+      res.status(400).send({ message: 'Невалидный id ' });
+    }
+    res.status(500).send({ message: `Ошибка: ${err.code}${err.message}` });
+  });
 
 const dislikeCard = (req, res) => Card.findByIdAndUpdate(
   req.params.cardId,
@@ -59,7 +65,12 @@ const dislikeCard = (req, res) => Card.findByIdAndUpdate(
     }
     res.send(likes);
   })
-  .catch((err) => res.status(500).send(`Ошибка: ${err.code}${err.message}`));
+  .catch((err) => {
+    if (err.name === 'CastError') {
+      res.status(400).send({ message: 'Невалидный id ' });
+    }
+    res.status(500).send({ message: `Ошибка: ${err.code}${err.message}` });
+  });
 
 module.exports = {
   getCards,
