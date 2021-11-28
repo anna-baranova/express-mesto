@@ -1,12 +1,14 @@
 const express = require('express');
 
 const app = express();
-const path = require('path');
 const mongoose = require('mongoose');
+const { celebrate, Joi, errors } = require('celebrate');
 const userRouter = require('./routes/users');
 const cardRouter = require('./routes/cards');
+
 const { createUser, login } = require('./controllers/users');
 const auth = require('./middlewares/auth');
+const serverError = require('./middlewares/serverError');
 const NotFoundError = require('./errors/not-found-error');
 
 const { PORT = 3000 } = process.env;
@@ -18,31 +20,45 @@ mongoose.connect('mongodb://localhost:27017/mestodb', {
   useUnifiedTopology: true,
 });
 
-app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
 
-app.post('/signin', login);
-app.post('/signup', createUser);
+app.post(
+  '/signin',
+  celebrate({
+    body: Joi.object().keys({
+      email: Joi.string().required().email(),
+      password: Joi.string().required(),
+    }),
+  }),
+  login,
+);
+app.post(
+  '/signup',
+  celebrate({
+    body: Joi.object().keys({
+      email: Joi.string().required().email(),
+      password: Joi.string().required(),
+      name: Joi.string().min(2).max(30),
+      about: Joi.string().min(2).max(30),
+      avatar: Joi.string()
+        .regex(/https?:\/\/(www\.)?[-a-zA-Z0-9]{2,256}\.[a-z]{1,6}([-a-zA-Z0-9-._~:/?#[\]@!$&'()*+,;=\S]*)/),
+    }),
+  }),
+  createUser,
+);
 
 app.use(auth);
 
 app.use('/', userRouter);
 app.use('/', cardRouter);
-app.use((req, res) => {
+app.use(() => {
   throw new NotFoundError('Запрашиваемый ресурс не найден');
 });
 
-app.use((err, req, res, next) => {
-  const { statusCode = 500, message } = err;
-  res
-    .status(statusCode)
-    .send({
-      message: statusCode === 500
-        ? 'На сервере произошла ошибка'
-        : message,
-    });
-});
+app.use(errors());
+
+app.use(serverError);
 
 app.listen(PORT, () => {
-  console.log(`Server is running on PORT ${PORT}`);
+  // console.log(`Server is running on PORT ${PORT}`);
 });

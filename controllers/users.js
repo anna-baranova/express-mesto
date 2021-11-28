@@ -6,6 +6,8 @@ const ConflictingRequestError = require('../errors/conflicting-request-error');
 const NotFoundError = require('../errors/not-found-error');
 const UnauthorizedError = require('../errors/unauthorized-err');
 
+const { JWT_SECRET = 'my-super-secret-key' } = process.env;
+
 const getUsers = (req, res, next) => User.find({})
   .then((users) => {
     res.send(users);
@@ -62,7 +64,8 @@ const createUser = (req, res, next) => {
             .catch(next);
         });
       return true;
-    });
+    })
+    .catch(next);
 };
 
 const updateUserInfo = (req, res, next) => {
@@ -95,7 +98,7 @@ const login = (req, res, next) => {
   } = req.body;
   return User.findUserByCredentials(email, password)
     .then((user) => {
-      const token = jwt.sign({ _id: user._id }, 'my-super-secret-key', { expiresIn: '7d' });
+      const token = jwt.sign({ _id: user._id }, JWT_SECRET, { expiresIn: '7d' });
       res.cookie('jwt', token, {
         httpOnly: true,
       })
