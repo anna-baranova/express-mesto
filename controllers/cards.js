@@ -35,12 +35,8 @@ const deleteCard = (req, res, next) => {
         throw new ForbiddenError('Вы не можете удалять карточки других пользователей');
       }
       Card.findByIdAndDelete(req.params.cardId)
-        .then((data) => res.send(data));
-    })
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        throw new BadRequestError('Невалидный id карточки');
-      }
+        .then((data) => res.send(data))
+        .catch(next);
     })
     .catch(next);
 };
@@ -56,11 +52,6 @@ const likeCard = (req, res, next) => Card.findByIdAndUpdate(
     }
     res.send(likes);
   })
-  .catch((err) => {
-    if (err.name === 'CastError') {
-      throw new BadRequestError('Невалидный id карточки');
-    }
-  })
   .catch(next);
 
 const dislikeCard = (req, res, next) => Card.findByIdAndUpdate(
@@ -73,11 +64,6 @@ const dislikeCard = (req, res, next) => Card.findByIdAndUpdate(
       throw new NotFoundError('Запрашиваемая карточка не найдена');
     }
     res.send(likes);
-  })
-  .catch((err) => {
-    if (err.name === 'CastError') {
-      throw new BadRequestError('Невалидный id карточки');
-    }
   })
   .catch(next);
 
