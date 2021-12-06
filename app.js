@@ -3,6 +3,7 @@ const express = require('express');
 const app = express();
 const mongoose = require('mongoose');
 const { celebrate, Joi, errors } = require('celebrate');
+const { requestLogger, errorLogger } = require('./middlewares/logger');
 const userRouter = require('./routes/users');
 const cardRouter = require('./routes/cards');
 
@@ -21,6 +22,7 @@ mongoose.connect('mongodb://localhost:27017/mestodb', {
 });
 
 app.use(express.json());
+app.use(requestLogger); // подключаем логгер запросов
 
 app.post(
   '/signin',
@@ -55,9 +57,10 @@ app.use(() => {
   throw new NotFoundError('Запрашиваемый ресурс не найден');
 });
 
-app.use(errors());
+app.use(errorLogger); // подключаем логгер ошибок
+app.use(errors()); // обработчик ошибок celebrate
 
-app.use(serverError);
+app.use(serverError); // централизованный обработчик ошибок
 
 app.listen(PORT, () => {
   // console.log(`Server is running on PORT ${PORT}`);
