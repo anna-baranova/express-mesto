@@ -3,13 +3,13 @@ const express = require('express');
 const app = express();
 const mongoose = require('mongoose');
 const { celebrate, Joi, errors } = require('celebrate');
-// const { requestLogger, errorLogger } = require('./middlewares/logger');
 const userRouter = require('./routes/users');
 const cardRouter = require('./routes/cards');
 
 const { createUser, login } = require('./controllers/users');
 const auth = require('./middlewares/auth');
 const serverError = require('./middlewares/serverError');
+const { requestLogger, errorLogger } = require('./middlewares/logger');
 const NotFoundError = require('./errors/not-found-error');
 
 const { PORT = 3000 } = process.env;
@@ -22,7 +22,7 @@ mongoose.connect('mongodb://localhost:27017/mestodb', {
 });
 
 app.use(express.json());
-// app.use(requestLogger); // подключаем логгер запросов
+app.use(requestLogger); // подключаем логгер запросов
 
 app.post(
   '/signin',
@@ -53,15 +53,17 @@ app.use(auth);
 
 app.use('/', userRouter);
 app.use('/', cardRouter);
+
 app.use(() => {
   throw new NotFoundError('Запрашиваемый ресурс не найден');
 });
 
-// app.use(errorLogger); // подключаем логгер ошибок
+app.use(errorLogger); // подключаем логгер ошибок
+
 app.use(errors()); // обработчик ошибок celebrate
 
 app.use(serverError); // централизованный обработчик ошибок
 
 app.listen(PORT, () => {
-  // console.log(`Server is running on PORT ${PORT}`);
+  console.log(`Server is running on PORT ${PORT}`);
 });
